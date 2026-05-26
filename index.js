@@ -118,7 +118,7 @@ app.post('/login', async (req, res) => {
 
 app.post('/users',authenticateToken, async (req, res) => {
     try {
-        const {name, age} = req.body
+        const {name, age, email} = req.body
 
         if (!name || name.trim() === "") {
             return res.status(400).json({ message: "Name is required" })
@@ -127,10 +127,14 @@ app.post('/users',authenticateToken, async (req, res) => {
         if (!age || typeof age !== "number") {
             return res.status(400).json({message: "Age must be a number" })
         }
+
+        if (!email || !email.includes('@')) {
+            return res.status(400).json({ message: "Valid email is required "})
+        }
         
         const result = await pool.query(
-            'INSERT INTO users (name, age) VALUES ($1, $2) RETURNING*',
-            [name, age]
+            'INSERT INTO users (name, age, email) VALUES ($1, $2, $3) RETURNING*',
+            [name, age, email]
         )
 
         res.status(201).json(result.rows[0])
